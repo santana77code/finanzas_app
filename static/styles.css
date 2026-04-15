@@ -1,0 +1,335 @@
+:root {
+    --primary-color: #6366f1;
+    --primary-hover: #4f46e5;
+    --bg-color: #0f172a;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    
+    --color-income: #34d399;
+    --color-expense: #f87171;
+    --color-savings: #60a5fa;
+    --color-balance: #818cf8;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Background gradient animation */
+.background-animation {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #0f172a 40%, #020617 100%);
+    z-index: -1;
+    animation: drift 20s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-5%, -5%); }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+header h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(to right, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+header p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+/* Glassmorphism Classes */
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    padding: 1.5rem;
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+}
+
+.card.main-card {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+    border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.card h3 {
+    font-size: 1rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.amount {
+    font-size: 2.5rem;
+    font-weight: 800;
+}
+
+.income { color: var(--color-income); }
+.expense { color: var(--color-expense); }
+.savings { color: var(--color-savings); }
+.balance { color: var(--color-balance); }
+
+/* Main layout */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+/* Form Styles */
+.form-container h2, .recent-records h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+input[type="number"], 
+input[type="text"], 
+select {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+input:focus, select:focus {
+    border-color: var(--primary-color);
+}
+
+/* Custom Radio Buttons */
+.type-selector {
+    display: flex;
+    gap: 1rem;
+}
+
+.type-selector label {
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+    margin: 0;
+}
+
+.type-selector input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.type-selector span {
+    display: block;
+    text-align: center;
+    padding: 0.8rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.type-selector input[value="Ingreso"]:checked ~ span { background: rgba(52, 211, 153, 0.2); border-color: var(--color-income); color: var(--color-income); }
+.type-selector input[value="Gasto"]:checked ~ span { background: rgba(248, 113, 113, 0.2); border-color: var(--color-expense); color: var(--color-expense); }
+.type-selector input[value="Ahorro"]:checked ~ span { background: rgba(96, 165, 250, 0.2); border-color: var(--color-savings); color: var(--color-savings); }
+
+.btn-primary {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 1rem;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Status Message */
+.status-message {
+    margin-top: 1rem;
+    text-align: center;
+    padding: 0.8rem;
+    border-radius: 8px;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.status-message.success {
+    display: block;
+    opacity: 1;
+    background: rgba(52, 211, 153, 0.2);
+    color: var(--color-income);
+    border: 1px solid var(--color-income);
+}
+
+.status-message.error {
+    display: block;
+    opacity: 1;
+    background: rgba(248, 113, 113, 0.2);
+    color: var(--color-expense);
+    border: 1px solid var(--color-expense);
+}
+
+/* Recent Records List */
+.records-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.records-list::-webkit-scrollbar {
+    width: 6px;
+}
+.records-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.records-list::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 10px;
+}
+
+.record-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 10px;
+    border-left: 4px solid transparent;
+    transition: transform 0.2s;
+}
+
+.record-item:hover {
+    transform: translateX(5px);
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.record-item.t-ingreso { border-left-color: var(--color-income); }
+.record-item.t-gasto { border-left-color: var(--color-expense); }
+.record-item.t-ahorro { border-left-color: var(--color-savings); }
+
+.record-info h4 {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+}
+
+.record-info p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.record-amount {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* Delete Button */
+.delete-btn {
+    background: none;
+    border: none;
+    color: var(--color-expense);
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    padding: 0.5rem;
+    margin-left: 1rem;
+}
+
+.delete-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+}
