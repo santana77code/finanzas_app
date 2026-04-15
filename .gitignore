@@ -1,0 +1,17 @@
+# Base de datos
+*.db
+*.sqlite3
+
+# Excel original (contiene tu data privada)
+*.xlsx
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+.mypy_cache/
+env/
+venv/
+
+# Variables de entorno
+.env
