@@ -53,13 +53,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Filter Selectors Setup
+    const daySelect = document.getElementById('day-select');
     const monthSelect = document.getElementById('month-select');
     const yearSelect = document.getElementById('year-select');
 
-    if (monthSelect && yearSelect) {
+    if (monthSelect && yearSelect && daySelect) {
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
         const currentMonth = currentDate.getMonth() + 1; // 1-12
+        const currentDay = currentDate.getDate();
 
         // Populate year dropdown (current year - 5 to current year + 5)
         for (let y = currentYear - 5; y <= currentYear + 5; y++) {
@@ -69,13 +71,39 @@ document.addEventListener('DOMContentLoaded', () => {
             yearSelect.appendChild(option);
         }
 
+        // Setup dynamic days
+        function updateDays() {
+            const y = parseInt(yearSelect.value);
+            const m = parseInt(monthSelect.value);
+            const daysInMonth = new Date(y, m, 0).getDate();
+            
+            const prevValue = daySelect.value;
+            daySelect.innerHTML = '<option value="0">Mes Completo</option>';
+            
+            for (let d = 1; d <= daysInMonth; d++) {
+                const option = document.createElement('option');
+                option.value = d;
+                option.textContent = d;
+                daySelect.appendChild(option);
+            }
+            
+            if (prevValue > 0 && prevValue <= daysInMonth) {
+                daySelect.value = prevValue;
+            } else {
+                daySelect.value = "0";
+            }
+        }
+
         // Set initial values
         monthSelect.value = currentMonth;
         yearSelect.value = currentYear;
+        updateDays();
+        daySelect.value = "0"; // Default: whole month, users can change to currentDay if they want
 
         // Auto reload on change
-        monthSelect.addEventListener('change', reloadData);
-        yearSelect.addEventListener('change', reloadData);
+        daySelect.addEventListener('change', reloadData);
+        monthSelect.addEventListener('change', () => { updateDays(); reloadData(); });
+        yearSelect.addEventListener('change', () => { updateDays(); reloadData(); });
     }
 
     function reloadData() {
@@ -190,11 +218,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!token) return;
         
         let url = '/api/summary';
+        const daySelect = document.getElementById('day-select');
         const monthSelect = document.getElementById('month-select');
         const yearSelect = document.getElementById('year-select');
         
         if (monthSelect && yearSelect) {
             url += `?mes=${monthSelect.value}&anio=${yearSelect.value}`;
+            if (daySelect && daySelect.value !== "0") {
+                url += `&dia=${daySelect.value}`;
+            }
         }
         
         try {
@@ -223,16 +255,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!token) return;
         
         let url = '/api/records_by_month';
+        const daySelect = document.getElementById('day-select');
         const monthSelect = document.getElementById('month-select');
         const yearSelect = document.getElementById('year-select');
         
         if (monthSelect && yearSelect) {
             url += `?mes=${monthSelect.value}&anio=${yearSelect.value}`;
+            if (daySelect && daySelect.value !== "0") {
+                url += `&dia=${daySelect.value}`;
+            }
             
             const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
             const modalTitle = document.getElementById('modal-title');
             if (modalTitle) {
-                modalTitle.textContent = `Movimientos de ${monthNames[monthSelect.value - 1]} ${yearSelect.value}`;
+                if (daySelect && daySelect.value !== "0") {
+                    modalTitle.textContent = `Movimientos del ${daySelect.value} de ${monthNames[monthSelect.value - 1]} ${yearSelect.value}`;
+                } else {
+                    modalTitle.textContent = `Movimientos de ${monthNames[monthSelect.value - 1]} ${yearSelect.value}`;
+                }
             }
         }
 

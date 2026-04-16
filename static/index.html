@@ -19,8 +19,11 @@
             <button id="logout-btn" class="btn-primary" style="width: auto; padding: 0.4rem 1rem; margin-top: 0; font-size: 0.9rem; background: rgba(248, 113, 113, 0.1); border: 1px solid var(--color-expense); color: var(--color-expense);">Cerrar Sesión</button>
         </header>
 
-        <div class="filter-section glass" style="margin-bottom: 1.5rem; display: flex; justify-content: center; gap: 1rem; align-items: center; padding: 1rem;">
-            <label for="month-select" style="font-weight: 600;">Filtrar por:</label>
+        <div class="filter-section glass" style="margin-bottom: 1.5rem; display: flex; justify-content: center; gap: 0.5rem; align-items: center; padding: 1rem; flex-wrap: wrap;">
+            <select id="day-select" style="padding: 0.4rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white;">
+                <option value="0">Mes Completo</option>
+                <!-- Se llenará dinámicamente -->
+            </select>
             <select id="month-select" style="padding: 0.4rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white;">
                 <option value="1">Enero</option>
                 <option value="2">Febrero</option>

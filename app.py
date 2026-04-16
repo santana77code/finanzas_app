@@ -95,17 +95,21 @@ def delete_record(registro_id: int, db: Session = Depends(get_db), current_user:
     return {"status": "success", "message": "Registro eliminado"}
 
 @app.get("/api/summary")
-def get_monthly_summary(mes: Optional[int] = None, anio: Optional[int] = None, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+def get_monthly_summary(dia: Optional[int] = None, mes: Optional[int] = None, anio: Optional[int] = None, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     if not mes or not anio:
         now = datetime.now()
         mes = now.month
         anio = now.year
         
-    registros = db.query(models.Record).filter(
+    query = db.query(models.Record).filter(
         models.Record.owner_id == current_user.id,
         extract('month', models.Record.fecha) == mes,
         extract('year', models.Record.fecha) == anio
-    ).all()
+    )
+    if dia and dia > 0:
+        query = query.filter(extract('day', models.Record.fecha) == dia)
+        
+    registros = query.all()
     
     resumen = {"Ingreso": 0.0, "Gasto": 0.0, "Ahorro": 0.0, "Balance_Disponible": 0.0}
     for r in registros:
@@ -135,17 +139,21 @@ def get_recent(db: Session = Depends(get_db), current_user: models.User = Depend
     ]}
 
 @app.get("/api/records_by_month")
-def get_records_by_month(mes: Optional[int] = None, anio: Optional[int] = None, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+def get_records_by_month(dia: Optional[int] = None, mes: Optional[int] = None, anio: Optional[int] = None, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     if not mes or not anio:
         now = datetime.now()
         mes = now.month
         anio = now.year
         
-    registros = db.query(models.Record).filter(
+    query = db.query(models.Record).filter(
         models.Record.owner_id == current_user.id,
         extract('month', models.Record.fecha) == mes,
         extract('year', models.Record.fecha) == anio
-    ).order_by(models.Record.fecha.desc()).all()
+    )
+    if dia and dia > 0:
+        query = query.filter(extract('day', models.Record.fecha) == dia)
+        
+    registros = query.order_by(models.Record.fecha.desc()).all()
     
     return {"registros": [
         {
