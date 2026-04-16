@@ -52,10 +52,67 @@ document.addEventListener('DOMContentLoaded', () => {
         }).format(amount);
     }
 
+    // Filter Selectors Setup
+    const monthSelect = document.getElementById('month-select');
+    const yearSelect = document.getElementById('year-select');
+
+    if (monthSelect && yearSelect) {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1; // 1-12
+
+        // Populate year dropdown (current year - 5 to current year + 5)
+        for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+            const option = document.createElement('option');
+            option.value = y;
+            option.textContent = y;
+            yearSelect.appendChild(option);
+        }
+
+        // Set initial values
+        monthSelect.value = currentMonth;
+        yearSelect.value = currentYear;
+
+        // Auto reload on change
+        monthSelect.addEventListener('change', reloadData);
+        yearSelect.addEventListener('change', reloadData);
+    }
+
+    function reloadData() {
+        loadSummary();
+        // If modal is open, reload records list
+        const modal = document.getElementById('history-modal');
+        if (modal && modal.style.display === 'flex') {
+            loadMonthRecords();
+        }
+    }
+
+    // Modal Logic
+    const openHistoryBtn = document.getElementById('open-history-btn');
+    const closeHistoryBtn = document.getElementById('close-modal-btn');
+    const historyModal = document.getElementById('history-modal');
+
+    if (openHistoryBtn && closeHistoryBtn && historyModal) {
+        openHistoryBtn.addEventListener('click', () => {
+            historyModal.style.display = 'flex';
+            loadMonthRecords();
+        });
+
+        closeHistoryBtn.addEventListener('click', () => {
+            historyModal.style.display = 'none';
+        });
+
+        // Close when clicking outside
+        historyModal.addEventListener('click', (e) => {
+            if (e.target === historyModal) {
+                historyModal.style.display = 'none';
+            }
+        });
+    }
+
     // Load initial data
     if (document.getElementById('total-ingresos')) {
         loadSummary();
-        loadRecentRecords();
     }
 
     // Form submission
@@ -100,8 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.querySelector('input[value="Ingreso"]').checked = true;
                     updateCategoryOptions('Ingreso');
                     
-                    loadSummary();
-                    loadRecentRecords();
+                    reloadData();
                 } else {
                     showStatus(result.detail || 'Error al guardar el registro', 'error');
                 }
@@ -132,8 +188,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadSummary() {
         if (!token) return;
+        
+        let url = '/api/summary';
+        const monthSelect = document.getElementById('month-select');
+        const yearSelect = document.getElementById('year-select');
+        
+        if (monthSelect && yearSelect) {
+            url += `?mes=${monthSelect.value}&anio=${yearSelect.value}`;
+        }
+        
         try {
-            const response = await fetch('/api/summary', {
+            const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.status === 401) {
@@ -154,21 +219,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function loadRecentRecords() {
+    async function loadMonthRecords() {
         if (!token) return;
+        
+        let url = '/api/records_by_month';
+        const monthSelect = document.getElementById('month-select');
+        const yearSelect = document.getElementById('year-select');
+        
+        if (monthSelect && yearSelect) {
+            url += `?mes=${monthSelect.value}&anio=${yearSelect.value}`;
+            
+            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            const modalTitle = document.getElementById('modal-title');
+            if (modalTitle) {
+                modalTitle.textContent = `Movimientos de ${monthNames[monthSelect.value - 1]} ${yearSelect.value}`;
+            }
+        }
+
         try {
-            const response = await fetch('/api/recent', {
+            const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.status === 401) return;
 
             if (response.ok) {
                 const data = await response.json();
-                const container = document.getElementById('records-list');
+                const container = document.getElementById('modal-records-list');
+                if(!container) return;
+                
                 container.innerHTML = '';
                 
                 if (data.registros.length === 0) {
-                    container.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 1rem;">No hay registros todavía.</div>';
+                    container.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 2rem;">No hay registros para este mes.</div>';
                     return;
                 }
 
@@ -215,8 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             if (res.ok) {
                                 showStatus('Registro eliminado correctamente', 'success');
-                                loadSummary();
-                                loadRecentRecords();
+                                reloadData();
                             } else {
                                 const errData = await res.json();
                                 showStatus(errData.detail || 'Error al eliminar', 'error');
@@ -232,7 +313,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } catch (error) {
-            document.getElementById('records-list').innerHTML = '<div class="error">Error cargando registros</div>';
+            const container = document.getElementById('modal-records-list');
+            if (container) container.innerHTML = '<div class="error">Error cargando registros</div>';
         }
     }
 

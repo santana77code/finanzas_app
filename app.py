@@ -134,6 +134,30 @@ def get_recent(db: Session = Depends(get_db), current_user: models.User = Depend
         } for r in registros
     ]}
 
+@app.get("/api/records_by_month")
+def get_records_by_month(mes: Optional[int] = None, anio: Optional[int] = None, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    if not mes or not anio:
+        now = datetime.now()
+        mes = now.month
+        anio = now.year
+        
+    registros = db.query(models.Record).filter(
+        models.Record.owner_id == current_user.id,
+        extract('month', models.Record.fecha) == mes,
+        extract('year', models.Record.fecha) == anio
+    ).order_by(models.Record.fecha.desc()).all()
+    
+    return {"registros": [
+        {
+            "id": r.id,
+            "Tipo": r.tipo,
+            "Categoria": r.categoria,
+            "Descripcion": r.descripcion,
+            "Monto": r.monto,
+            "Fecha": r.fecha.strftime("%Y-%m-%d %H:%M:%S")
+        } for r in registros
+    ]}
+
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
 if __name__ == "__main__":

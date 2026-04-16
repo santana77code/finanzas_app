@@ -329,7 +329,85 @@ input:focus, select:focus {
 
 /* Responsive */
 @media (max-width: 900px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .summary-cards {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .amount {
+        font-size: 1.5rem;
+    }
+
     .main-content {
         grid-template-columns: 1fr;
     }
+
+    /* Modal Fullscreen en móvil como nueva pestaña */
+    .modal-content {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        max-width: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
+        padding: 1rem;
+    }
+    
+    .modal-header {
+        padding-top: 1rem;
+    }
+
+    .records-list {
+        max-height: calc(100vh - 120px) !important;
+    }
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 600px;
+    max-height: 85vh;
+    padding: 2rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
