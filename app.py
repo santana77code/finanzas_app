@@ -97,7 +97,7 @@ def delete_record(registro_id: int, db: Session = Depends(get_db), current_user:
 @app.get("/api/summary")
 def get_monthly_summary(dia: Optional[int] = None, mes: Optional[int] = None, anio: Optional[int] = None, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     if not mes or not anio:
-        now = datetime.now()
+        now = models.get_colombia_time()
         mes = now.month
         anio = now.year
         
@@ -141,7 +141,7 @@ def get_recent(db: Session = Depends(get_db), current_user: models.User = Depend
 @app.get("/api/records_by_month")
 def get_records_by_month(dia: Optional[int] = None, mes: Optional[int] = None, anio: Optional[int] = None, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     if not mes or not anio:
-        now = datetime.now()
+        now = models.get_colombia_time()
         mes = now.month
         anio = now.year
         
