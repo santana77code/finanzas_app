@@ -238,20 +238,53 @@ class ExcelDB:
                 if len(df) > 0:
                     df["Fecha"] = pd.to_datetime(df["Fecha"])
                     
+                    df_monthly = df.copy()
                     if month and year:
-                        df = df[(df["Fecha"].dt.month == month) & (df["Fecha"].dt.year == year)]
+                        df_monthly = df_monthly[(df_monthly["Fecha"].dt.month == month) & (df_monthly["Fecha"].dt.year == year)]
                     elif month:
-                        df = df[df["Fecha"].dt.month == month]
+                        df_monthly = df_monthly[df_monthly["Fecha"].dt.month == month]
                     elif year:
-                        df = df[df["Fecha"].dt.year == year]
+                        df_monthly = df_monthly[df_monthly["Fecha"].dt.year == year]
                         
-                    resumen[tipo] = float(df["Monto"].sum())
+                    resumen[tipo] = float(df_monthly["Monto"].sum())
             except ValueError:
                 # La hoja podría no existir
                 pass
 
-        # Calculate logical balance
-        resumen["Balance_Disponible"] = resumen["Ingreso"] - resumen["Gasto"]
+        # Calculate cumulative balance
+        import calendar
+        if month and year:
+            _, last_day = calendar.monthrange(year, month)
+            end_date = datetime(year, month, last_day, 23, 59, 59, 999999)
+        elif year:
+            end_date = datetime(year, 12, 31, 23, 59, 59, 999999)
+        elif month:
+            current_year = datetime.now().year
+            _, last_day = calendar.monthrange(current_year, month)
+            end_date = datetime(current_year, month, last_day, 23, 59, 59, 999999)
+        else:
+            end_date = datetime.max
+
+        total_income_cumulative = 0.0
+        total_expense_cumulative = 0.0
+
+        try:
+            df_incomes = pd.read_excel(self.filename, sheet_name="Ingresos")
+            if len(df_incomes) > 0:
+                df_incomes["Fecha"] = pd.to_datetime(df_incomes["Fecha"])
+                total_income_cumulative = float(df_incomes[df_incomes["Fecha"] <= end_date]["Monto"].sum())
+        except ValueError:
+            pass
+
+        try:
+            df_expenses = pd.read_excel(self.filename, sheet_name="Gastos")
+            if len(df_expenses) > 0:
+                df_expenses["Fecha"] = pd.to_datetime(df_expenses["Fecha"])
+                total_expense_cumulative = float(df_expenses[df_expenses["Fecha"] <= end_date]["Monto"].sum())
+        except ValueError:
+            pass
+
+        resumen["Balance_Disponible"] = total_income_cumulative - total_expense_cumulative
         
         return resumen
     

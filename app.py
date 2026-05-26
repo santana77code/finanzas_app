@@ -2,8 +2,9 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
-from sqlalchemy import extract
+from sqlalchemy import extract, func
 import os
+import calendar
 from database import engine, Base, get_db
 import models
 import auth
@@ -116,7 +117,27 @@ def get_monthly_summary(dia: Optional[int] = None, mes: Optional[int] = None, an
         if r.tipo in resumen:
             resumen[r.tipo] += r.monto
             
-    resumen["Balance_Disponible"] = resumen["Ingreso"] - resumen["Gasto"]
+    # Calculate cumulative balance: Sum of all incomes minus expenses from the beginning of time up to the end of the selected period.
+    if dia and dia > 0:
+        end_date = datetime(anio, mes, dia, 23, 59, 59, 999999)
+    else:
+        _, last_day = calendar.monthrange(anio, mes)
+        end_date = datetime(anio, mes, last_day, 23, 59, 59, 999999)
+        
+    total_cum_ingreso = db.query(func.sum(models.Record.monto)).filter(
+        models.Record.owner_id == current_user.id,
+        models.Record.tipo == "Ingreso",
+        models.Record.fecha <= end_date
+    ).scalar() or 0.0
+    
+    total_cum_gasto = db.query(func.sum(models.Record.monto)).filter(
+        models.Record.owner_id == current_user.id,
+        models.Record.tipo == "Gasto",
+        models.Record.fecha <= end_date
+    ).scalar() or 0.0
+    
+    resumen["Balance_Disponible"] = total_cum_ingreso - total_cum_gasto
+    
     return {
         "mes": mes,
         "anio": anio,
